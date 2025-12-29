@@ -36,6 +36,9 @@ if (!in_array($file_type, $supported_formats)) {
     
     <!-- Custom Styles -->
     <style>
+
+        /* Reset View Button */
+
         * {
             margin: 0;
             padding: 0;
@@ -168,6 +171,28 @@ if (!in_array($file_type, $supported_formats)) {
             direction: ltr;
             z-index: 1000;
         }
+
+            .reset-view-btn {
+        position: absolute;
+        top: 60px;
+        left: 10px;
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: all 0.2s;
+    }
+
+    .reset-view-btn:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
     </style>
 </head>
 <body>
@@ -176,6 +201,11 @@ if (!in_array($file_type, $supported_formats)) {
     
     <!-- Close Button -->
     <button class="close-btn" onclick="window.close()">✕ بستن</button>
+
+    <!-- Reset View Button (NEW) -->
+    <button class="reset-view-btn" onclick="resetView()" title="بازگشت به نمای کامل">
+    🔍 نمای کامل
+    </button>
     
     <!-- Info Panel -->
     <div class="info-panel">
@@ -194,7 +224,7 @@ if (!in_array($file_type, $supported_formats)) {
     
     <!-- Leaflet JS -->
     <script src="js/leaflet.js"></script>
-    
+
     <!-- JSZip for KMZ support -->
     <script src="js/jszip.min.js"></script>
     

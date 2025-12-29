@@ -289,27 +289,135 @@ function loadShapefile(fileUrl) {
 }
 
 /**
+ * Global variable to store data bounds
+ */
+let dataBounds = null;
+
+/**
+ * Reset view to show all data
+ */
+function resetView() {
+    if (dataBounds && dataBounds.isValid()) {
+        console.log('🔄 Resetting view to data bounds');
+        map.fitBounds(dataBounds, { 
+            padding: [50, 50],
+            maxZoom: 18
+        });
+    } else if (dataLayer) {
+        console.log('🔄 Recalculating bounds');
+        try {
+            const bounds = dataLayer.getBounds();
+            if (bounds. isValid()) {
+                map.fitBounds(bounds, { 
+                    padding: [50, 50],
+                    maxZoom: 18
+                });
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not reset view:', e);
+            // Fallback to Iran center
+            map.setView([32.4279, 53.6880], 6);
+        }
+    } else {
+        // No data loaded, go to Iran center
+        map.setView([32.4279, 53.6880], 6);
+    }
+}
+/**
  * Handle successful data load
  */
+
+
 function onDataLoaded(layer, fileType) {
     console.log('✅ Data loaded successfully:', fileType);
-    
-    // Zoom to data bounds
-    try {
-        const bounds = layer.getBounds();
-        if (bounds. isValid()) {
-            map.fitBounds(bounds, { padding: [50, 50] });
-        }
-    } catch (e) {
-        console.warn('Could not fit bounds:', e);
-    }
+    console.log('📊 Layer object:', layer);
     
     // Count features
     let featureCount = 0;
+    let bounds = null;
+    
     try {
-        layer.eachLayer(function() { featureCount++; });
+        // Count layers
+        layer.eachLayer(function() { 
+            featureCount++; 
+        });
+        
+        console.log('📍 Feature count:', featureCount);
+        
+        // Get bounds
+        bounds = layer.getBounds();
+        console.log('📐 Bounds:', bounds);
+        
+        // Check if bounds are valid
+        if (bounds && bounds.isValid()) {
+            console.log('✅ Zooming to bounds.. .');
+            map.fitBounds(bounds, { 
+                padding: [50, 50],
+                maxZoom: 18  // Don't zoom in too close
+            });
+        } else {
+            console.warn('⚠️ Bounds not valid, checking individual layers.. .');
+            
+            // Try to get bounds from individual layers
+            let allBounds = [];
+            layer.eachLayer(function(l) {
+                if (l.getBounds) {
+                    allBounds.push(l.getBounds());
+                } else if (l.getLatLng) {
+                    // For point features
+                    const latlng = l.getLatLng();
+                    allBounds.push(L.latLngBounds([latlng, latlng]));
+                }
+            });
+            
+            if (allBounds.length > 0) {
+                // Combine all bounds
+                let combinedBounds = allBounds[0];
+                for (let i = 1; i < allBounds.length; i++) {
+                    combinedBounds.extend(allBounds[i]);
+                }
+                
+                console.log('✅ Zooming to combined bounds...');
+                map.fitBounds(combinedBounds, { 
+                    padding: [50, 50],
+                    maxZoom:  18
+                });
+            } else {
+                console.warn('⚠️ No bounds found, using default view');
+            }
+            // Save bounds globally for reset button
+            if (bounds && bounds.isValid()) {
+                dataBounds = bounds;
+                console.log('💾 Saved bounds for reset function');
+                // ...  rest of zoom code
+            }
+        }
     } catch (e) {
-        featureCount = 'نامشخص';
+        console.error('❌ Error getting bounds:', e);
+        
+        // Fallback:  Try to find any coordinates
+        try {
+            let firstCoord = null;
+            layer.eachLayer(function(l) {
+                if (! firstCoord) {
+                    if (l.getLatLng) {
+                        firstCoord = l.getLatLng();
+                    } else if (l. getLatLngs) {
+                        const latlngs = l.getLatLngs();
+                        if (latlngs.length > 0) {
+                            firstCoord = latlngs[0][0] || latlngs[0];
+                        }
+                    }
+                }
+            });
+            
+            if (firstCoord) {
+                console.log('✅ Zooming to first coordinate:', firstCoord);
+                map. setView(firstCoord, 15);
+            }
+        } catch (e2) {
+            console.error('❌ Could not zoom to data:', e2);
+        }
     }
     
     // Update status
@@ -318,7 +426,8 @@ function onDataLoaded(layer, fileType) {
     // Display info
     displayFileInfo({
         type: fileType,
-        features: featureCount
+        features:  featureCount,
+        bounds:  bounds ?  'موجود' : 'نامشخص'
     });
 }
 

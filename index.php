@@ -34,187 +34,36 @@ if (!in_array($file_type, $supported_formats)) {
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="css/leaflet.css" />
     
-    <!-- Custom Styles -->
-    <style>
-
-        /* Reset View Button */
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family:  Tahoma, Arial, sans-serif;
-            direction: rtl;
-        }
-        
-        #map {
-            width: 100%;
-            height:  100vh;
-            position:  absolute;
-            top: 0;
-            left: 0;
-        }
-        
-        /* Info Panel */
-        .info-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow:  0 4px 20px rgba(0,0,0,0.2);
-            z-index: 1000;
-            max-width: 350px;
-            min-width: 280px;
-        }
-        
-        . info-panel h3 {
-            margin:  0 0 15px 0;
-            color:  #09375B;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .info-panel .status {
-            padding: 12px;
-            background: #f0f9ff;
-            border-radius:  8px;
-            color: #0369a1;
-            font-size: 14px;
-            text-align: center;
-        }
-        
-        .info-panel .status.loading {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .info-panel .status.error {
-            background: #fee2e2;
-            color:  #991b1b;
-        }
-        
-        .info-panel . status.success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .info-item {
-            margin:  10px 0;
-            padding: 8px 0;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 13px;
-        }
-        
-        .info-item:last-child {
-            border-bottom: none;
-        }
-        
-        .info-item strong {
-            color: #374151;
-            display: inline-block;
-            min-width: 80px;
-        }
-        
-        /* Loading Spinner */
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top:  3px solid #09375B;
-            border-radius: 50%;
-            animation:  spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Close Button */
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            z-index:  1000;
-        }
-        
-        .close-btn:hover {
-            background: #dc2626;
-        }
-        
-        /* Coordinate Display */
-        .coordinate-display {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 10px 15px;
-            border-radius:  8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            font-size: 12px;
-            font-family: monospace;
-            direction: ltr;
-            z-index: 1000;
-        }
-
-            .reset-view-btn {
-        position: absolute;
-        top: 60px;
-        left: 10px;
-        background: #10b981;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        z-index: 1000;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        transition: all 0.2s;
-    }
-
-    .reset-view-btn:hover {
-        background: #059669;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    </style>
+    <!-- Custom Viewer CSS with cache busting -->
+    <link rel="stylesheet" href="css/viewer.css?v=1.0.0" />
 </head>
 <body>
     <!-- Map Container -->
     <div id="map"></div>
     
-    <!-- Close Button -->
+    <!-- Close Button - RIGHT SIDE -->
     <button class="close-btn" onclick="window.close()">✕ بستن</button>
 
-    <!-- Reset View Button (NEW) -->
+    <!-- Reset View Button - RIGHT SIDE -->
     <button class="reset-view-btn" onclick="resetView()" title="بازگشت به نمای کامل">
-    🔍 نمای کامل
+        🔍 نمای کامل
     </button>
     
-    <!-- Info Panel -->
-    <div class="info-panel">
-        <h3>📍 اطلاعات نقشه</h3>
-        <div id="status" class="status loading">
-            <span class="spinner"></span>
-            در حال بارگذاری...
+    <!-- Info Panel with Minimize Toggle -->
+    <div class="info-panel" id="infoPanel">
+        <h3>
+            <span>📍 اطلاعات نقشه</span>
+            <button class="minimize-toggle" onclick="toggleInfoPanel()" title="کوچک کردن / بزرگ کردن" aria-label="Toggle info panel">
+                <span id="toggleIcon">−</span>
+            </button>
+        </h3>
+        <div class="info-content">
+            <div id="status" class="status loading">
+                <span class="spinner"></span>
+                در حال بارگذاری...
+            </div>
+            <div id="fileInfo" style="margin-top: 15px;"></div>
         </div>
-        <div id="fileInfo" style="margin-top: 15px;"></div>
     </div>
     
     <!-- Coordinate Display -->

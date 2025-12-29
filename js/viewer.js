@@ -347,7 +347,6 @@ function onDataLoaded(layer, fileType) {
     console.log('✅ Data loaded successfully:', fileType);
     console.log('📊 Layer object:', layer);
     
-    // Count features
     let featureCount = 0;
     let bounds = null;
     
@@ -363,15 +362,18 @@ function onDataLoaded(layer, fileType) {
         bounds = layer.getBounds();
         console.log('📐 Bounds:', bounds);
         
-        // Check if bounds are valid
+        // ✅ FIX: Save bounds BEFORE checking validity
         if (bounds && bounds.isValid()) {
-            console.log('✅ Zooming to bounds.. .');
+            dataBounds = bounds;  // Move this line HERE
+            console.log('💾 Saved bounds for reset function');
+            console.log('✅ Zooming to bounds...');
+            
             map.fitBounds(bounds, { 
                 padding: [50, 50],
-                maxZoom: 18  // Don't zoom in too close
+                maxZoom: 18
             });
         } else {
-            console.warn('⚠️ Bounds not valid, checking individual layers.. .');
+            console.warn('⚠️ Bounds not valid, checking individual layers...');
             
             // Try to get bounds from individual layers
             let allBounds = [];
@@ -392,32 +394,28 @@ function onDataLoaded(layer, fileType) {
                     combinedBounds.extend(allBounds[i]);
                 }
                 
+                dataBounds = combinedBounds;
+                console.log('💾 Saved combined bounds for reset function');
                 console.log('✅ Zooming to combined bounds...');
                 map.fitBounds(combinedBounds, { 
                     padding: [50, 50],
-                    maxZoom:  18
+                    maxZoom: 18
                 });
             } else {
                 console.warn('⚠️ No bounds found, using default view');
-            }
-            // Save bounds globally for reset button
-            if (bounds && bounds.isValid()) {
-                dataBounds = bounds;
-                console.log('💾 Saved bounds for reset function');
-                // ...  rest of zoom code
             }
         }
     } catch (e) {
         console.error('❌ Error getting bounds:', e);
         
-        // Fallback:  Try to find any coordinates
+        // Fallback: Try to find any coordinates
         try {
             let firstCoord = null;
             layer.eachLayer(function(l) {
-                if (! firstCoord) {
+                if (!firstCoord) {
                     if (l.getLatLng) {
                         firstCoord = l.getLatLng();
-                    } else if (l. getLatLngs) {
+                    } else if (l.getLatLngs) {
                         const latlngs = l.getLatLngs();
                         if (latlngs.length > 0) {
                             firstCoord = latlngs[0][0] || latlngs[0];
@@ -428,7 +426,7 @@ function onDataLoaded(layer, fileType) {
             
             if (firstCoord) {
                 console.log('✅ Zooming to first coordinate:', firstCoord);
-                map. setView(firstCoord, 15);
+                map.setView(firstCoord, 15);
             }
         } catch (e2) {
             console.error('❌ Could not zoom to data:', e2);
@@ -441,8 +439,8 @@ function onDataLoaded(layer, fileType) {
     // Display info
     displayFileInfo({
         type: fileType,
-        features:  featureCount,
-        bounds:  bounds ?  'موجود' : 'نامشخص'
+        features: featureCount,
+        bounds: bounds ? 'موجود' : 'نامشخص'
     });
 }
 
@@ -469,3 +467,42 @@ function displayFileInfo(info) {
         </div>
     `;
 }
+
+/**
+ * Toggle info panel minimize/maximize
+ */
+function toggleInfoPanel() {
+    const panel = document.getElementById('infoPanel');
+    const icon = document.getElementById('toggleIcon');
+    
+    panel.classList.toggle('minimized');
+    
+    if (panel.classList.contains('minimized')) {
+        icon.textContent = '+';
+        console.log('ℹ️ Info panel minimized');
+    } else {
+        icon.textContent = '−';
+        console.log('ℹ️ Info panel expanded');
+    }
+}
+
+/**
+ * Auto-minimize info panel on mobile
+ */
+function checkMobileView() {
+    if (window.innerWidth <= 768) {
+        const panel = document.getElementById('infoPanel');
+        const icon = document.getElementById('toggleIcon');
+        
+        if (!panel.classList.contains('minimized')) {
+            panel.classList.add('minimized');
+            icon.textContent = '+';
+            console.log('📱 Auto-minimized for mobile view');
+        }
+    }
+}
+
+// Call on load and resize
+window.addEventListener('DOMContentLoaded', checkMobileView);
+window.addEventListener('resize', checkMobileView);
+

@@ -208,7 +208,7 @@ if (!in_array($file_type, $supported_formats)) {
     <script>
         // Pass PHP variables to JavaScript
         window.GIS_CONFIG = {
-            fileUrl: <? php echo json_encode($file_url); ?>,
+            fileUrl: <?php echo json_encode($file_url); ?>,
             fileType: <?php echo json_encode($file_type); ?>
         };
         

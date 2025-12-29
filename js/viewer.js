@@ -120,26 +120,6 @@ function loadGISFile(fileUrl, fileType) {
 /**
  * Load KML file
  */
-function loadKML(fileUrl) {
-    if (typeof omnivore === 'undefined') {
-        updateStatus('error', '❌ کتابخانه Omnivore بارگذاری نشده است');
-        return;
-    }
-    
-    dataLayer = omnivore.kml(fileUrl)
-        .on('ready', function(e) {
-            onDataLoaded(e. target, 'KML');
-        })
-        .on('error', function(e) {
-            updateStatus('error', '❌ خطا در بارگذاری KML');
-            console.error(e);
-        })
-        .addTo(map);
-}
-
-/**
- * Load KMZ file (compressed KML)
- */
 /**
  * Load KMZ file (compressed KML)
  */
@@ -150,28 +130,34 @@ function loadKMZ(fileUrl) {
         return;
     }
     
-    updateStatus('loading', 'در حال دانلود فایل KMZ...');
+    updateStatus('loading', 'در حال دانلود فایل KMZ.. .');
     
     // Fetch the KMZ file as binary
     fetch(fileUrl)
         .then(response => {
             if (! response.ok) throw new Error('خطا در دریافت فایل KMZ');
+            console.log('✅ KMZ file downloaded');
             return response.arrayBuffer();
         })
         .then(arrayBuffer => {
             updateStatus('loading', 'در حال استخراج KML از KMZ...');
+            console.log('📦 Extracting KMZ, size:', arrayBuffer.byteLength);
             
             // Unzip the KMZ
             const zip = new JSZip();
             return zip.loadAsync(arrayBuffer);
         })
         .then(zip => {
+            console. log('📂 KMZ extracted, files:', Object.keys(zip.files));
+            
             // Find the KML file inside (usually doc. kml or *.kml)
             let kmlFile = null;
             
             zip.forEach((relativePath, file) => {
+                console.log('  - Found file:', relativePath);
                 if (relativePath.toLowerCase().endsWith('.kml')) {
                     kmlFile = file;
+                    console.log('  ✅ KML file found:', relativePath);
                 }
             });
             
@@ -179,25 +165,32 @@ function loadKMZ(fileUrl) {
                 throw new Error('فایل KML در داخل KMZ یافت نشد');
             }
             
-            return kmlFile.async('string');
+            return kmlFile. async('string');
         })
         .then(kmlString => {
+            console.log('📝 KML content length:', kmlString.length);
+            console.log('📝 KML preview:', kmlString.substring(0, 500));
+            
             updateStatus('loading', 'در حال نمایش نقشه...');
             
             // Parse KML string with Leaflet Omnivore
-            dataLayer = omnivore.kml.parse(kmlString)
+            dataLayer = omnivore.kml. parse(kmlString)
                 .on('ready', function(e) {
+                    console.log('✅ KML parsed successfully');
+                    console.log('📊 Layer info:', e.target);
                     onDataLoaded(e.target, 'KMZ');
                 })
                 .on('error', function(e) {
+                    console.error('❌ KML parse error:', e);
                     updateStatus('error', '❌ خطا در تجزیه KML');
-                    console.error(e);
                 })
                 .addTo(map);
+            
+            console.log('🗺️ Layer added to map:', dataLayer);
         })
         .catch(error => {
+            console.error('❌ KMZ Error:', error);
             updateStatus('error', '❌ خطا در بارگذاری KMZ:  ' + error.message);
-            console.error('KMZ Error:', error);
         });
 }
 

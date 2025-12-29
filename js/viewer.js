@@ -140,21 +140,65 @@ function loadKML(fileUrl) {
 /**
  * Load KMZ file (compressed KML)
  */
+/**
+ * Load KMZ file (compressed KML)
+ */
 function loadKMZ(fileUrl) {
-    if (typeof omnivore === 'undefined') {
-        updateStatus('error', '❌ کتابخانه Omnivore بارگذاری نشده است');
+    // Check if JSZip is available
+    if (typeof JSZip === 'undefined') {
+        updateStatus('error', '❌ کتابخانه JSZip بارگذاری نشده است');
         return;
     }
     
-    dataLayer = omnivore.kmz(fileUrl)
-        .on('ready', function(e) {
-            onDataLoaded(e.target, 'KMZ');
+    updateStatus('loading', 'در حال دانلود فایل KMZ...');
+    
+    // Fetch the KMZ file as binary
+    fetch(fileUrl)
+        .then(response => {
+            if (! response.ok) throw new Error('خطا در دریافت فایل KMZ');
+            return response.arrayBuffer();
         })
-        .on('error', function(e) {
-            updateStatus('error', '❌ خطا در بارگذاری KMZ');
-            console.error(e);
+        .then(arrayBuffer => {
+            updateStatus('loading', 'در حال استخراج KML از KMZ...');
+            
+            // Unzip the KMZ
+            const zip = new JSZip();
+            return zip.loadAsync(arrayBuffer);
         })
-        .addTo(map);
+        .then(zip => {
+            // Find the KML file inside (usually doc. kml or *.kml)
+            let kmlFile = null;
+            
+            zip.forEach((relativePath, file) => {
+                if (relativePath.toLowerCase().endsWith('.kml')) {
+                    kmlFile = file;
+                }
+            });
+            
+            if (!kmlFile) {
+                throw new Error('فایل KML در داخل KMZ یافت نشد');
+            }
+            
+            return kmlFile.async('string');
+        })
+        .then(kmlString => {
+            updateStatus('loading', 'در حال نمایش نقشه...');
+            
+            // Parse KML string with Leaflet Omnivore
+            dataLayer = omnivore.kml.parse(kmlString)
+                .on('ready', function(e) {
+                    onDataLoaded(e.target, 'KMZ');
+                })
+                .on('error', function(e) {
+                    updateStatus('error', '❌ خطا در تجزیه KML');
+                    console.error(e);
+                })
+                .addTo(map);
+        })
+        .catch(error => {
+            updateStatus('error', '❌ خطا در بارگذاری KMZ:  ' + error.message);
+            console.error('KMZ Error:', error);
+        });
 }
 
 /**

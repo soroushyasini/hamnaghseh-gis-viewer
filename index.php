@@ -195,6 +195,9 @@ if (!in_array($file_type, $supported_formats)) {
     <!-- Leaflet JS -->
     <script src="js/leaflet.js"></script>
     
+    <!-- JSZip for KMZ support -->
+    <script src="js/jszip.min.js"></script>
+    
     <!-- Omnivore for KML/KMZ/GPX -->
     <script src="js/leaflet-omnivore.js"></script>
     

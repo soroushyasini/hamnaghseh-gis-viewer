@@ -117,12 +117,29 @@ function loadGISFile(fileUrl, fileType) {
     }
 }
 
-/**
- * Load KML file
- */
-/**
- * Load KMZ file (compressed KML)
- */
+// Load KML file
+
+function loadKML(fileUrl) {
+    if (typeof omnivore === 'undefined') {
+        updateStatus('error', '❌ کتابخانه Omnivore بارگذاری نشده است');
+        return;
+    }
+    
+    dataLayer = omnivore.kml(fileUrl)
+        .on('ready', function(e) {
+            onDataLoaded(e. target, 'KML');
+        })
+        .on('error', function(e) {
+            updateStatus('error', '❌ خطا در بارگذاری KML');
+            console.error(e);
+        })
+        .addTo(map);
+}
+
+
+
+// Load KMZ file (compressed KML)
+
 function loadKMZ(fileUrl) {
     // Check if JSZip is available
     if (typeof JSZip === 'undefined') {

@@ -288,7 +288,7 @@ function loadShapefile(fileUrl) {
         dataLayer = L.geoJSON(geojson, {
             onEachFeature: function(feature, layer) {
                 if (feature.properties) {
-                    const props = Object.entries(feature. properties)
+                    const props = Object.entries(feature.properties)
                         .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
                         .join('<br>');
                     layer.bindPopup(props);

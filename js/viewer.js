@@ -140,6 +140,9 @@ function loadKML(fileUrl) {
 
 // Load KMZ file (compressed KML)
 
+/**
+ * Load KMZ file (compressed KML)
+ */
 function loadKMZ(fileUrl) {
     // Check if JSZip is available
     if (typeof JSZip === 'undefined') {
@@ -147,12 +150,12 @@ function loadKMZ(fileUrl) {
         return;
     }
     
-    updateStatus('loading', 'در حال دانلود فایل KMZ.. .');
+    updateStatus('loading', 'در حال دانلود فایل KMZ...');
     
     // Fetch the KMZ file as binary
     fetch(fileUrl)
         .then(response => {
-            if (! response.ok) throw new Error('خطا در دریافت فایل KMZ');
+            if (!response.ok) throw new Error('خطا در دریافت فایل KMZ');
             console.log('✅ KMZ file downloaded');
             return response.arrayBuffer();
         })
@@ -165,9 +168,9 @@ function loadKMZ(fileUrl) {
             return zip.loadAsync(arrayBuffer);
         })
         .then(zip => {
-            console. log('📂 KMZ extracted, files:', Object.keys(zip.files));
+            console.log('📂 KMZ extracted, files:', Object.keys(zip.files));
             
-            // Find the KML file inside (usually doc. kml or *.kml)
+            // Find the KML file inside (usually doc.kml or *. kml)
             let kmlFile = null;
             
             zip.forEach((relativePath, file) => {
@@ -182,28 +185,40 @@ function loadKMZ(fileUrl) {
                 throw new Error('فایل KML در داخل KMZ یافت نشد');
             }
             
-            return kmlFile. async('string');
+            return kmlFile.async('string');
         })
         .then(kmlString => {
-            console.log('📝 KML content length:', kmlString.length);
+            console.log('📝 KML content length:', kmlString. length);
             console.log('📝 KML preview:', kmlString.substring(0, 500));
             
-            updateStatus('loading', 'در حال نمایش نقشه...');
+            updateStatus('loading', 'در حال نمایش نقشه.. .');
             
-            // Parse KML string with Leaflet Omnivore
-            dataLayer = omnivore.kml. parse(kmlString)
+            // Create a Blob URL for the KML string
+            const kmlBlob = new Blob([kmlString], { type: 'application/vnd.google-earth.kml+xml' });
+            const kmlUrl = URL.createObjectURL(kmlBlob);
+            
+            console.log('🔗 Created KML blob URL:', kmlUrl);
+            
+            // Load using omnivore with the blob URL
+            dataLayer = omnivore.kml(kmlUrl)
                 .on('ready', function(e) {
-                    console.log('✅ KML parsed successfully');
-                    console.log('📊 Layer info:', e.target);
+                    console.log('✅ KMZ loaded and parsed successfully');
+                    console.log('📊 KMZ Layer info:', e.target);
+                    
+                    // ✅ FIX: Call onDataLoaded to update UI and auto-zoom
                     onDataLoaded(e.target, 'KMZ');
+                    
+                    // Clean up blob URL
+                    URL.revokeObjectURL(kmlUrl);
                 })
                 .on('error', function(e) {
-                    console.error('❌ KML parse error:', e);
-                    updateStatus('error', '❌ خطا در تجزیه KML');
+                    console.error('❌ KML parse error from KMZ:', e);
+                    updateStatus('error', '❌ خطا در تجزیه KML از KMZ');
+                    URL.revokeObjectURL(kmlUrl);
                 })
                 .addTo(map);
             
-            console.log('🗺️ Layer added to map:', dataLayer);
+            console.log('🗺️ KMZ layer added to map');
         })
         .catch(error => {
             console.error('❌ KMZ Error:', error);
@@ -307,7 +322,7 @@ function resetView() {
         console.log('🔄 Recalculating bounds');
         try {
             const bounds = dataLayer.getBounds();
-            if (bounds. isValid()) {
+            if (bounds.isValid()) {
                 map.fitBounds(bounds, { 
                     padding: [50, 50],
                     maxZoom: 18

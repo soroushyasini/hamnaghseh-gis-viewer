@@ -270,3 +270,143 @@ body {
         display: none;
     }
 }
+
+/* ===== LEAFLET LAYER CONTROL STYLING ===== */
+
+/* Layer control container */
+.leaflet-control-layers {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border: 2px solid #e5e7eb;
+}
+
+/* Layer control toggle button */
+.leaflet-control-layers-toggle {
+    position: relative;
+    background: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+/* CSS-only layer icon (no image needed) */
+.leaflet-control-layers-toggle::before {
+    content: "☰";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    color: #09375B;
+    font-weight: bold;
+}
+
+.leaflet-control-layers-toggle:hover {
+    background-color: #f3f4f6;
+}
+
+.leaflet-control-layers-toggle:hover::before {
+    color: #10b981;
+}
+
+/* Expanded layer list */
+.leaflet-control-layers-expanded {
+    padding: 12px;
+    min-width: 200px;
+    background: white;
+    border-radius: 8px;
+    animation: fadeIn 0.2s ease-in;
+}
+
+/* Layer control sections */
+.leaflet-control-layers-base,
+.leaflet-control-layers-overlays {
+    margin-bottom: 8px;
+}
+
+/* Section title styling */
+.leaflet-control-layers-base::before {
+    content: "🗺️ نقشه پایه";
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+    color: #09375B;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+/* Individual layer labels */
+.leaflet-control-layers label {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    margin: 4px 0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: #374151;
+}
+
+.leaflet-control-layers label:hover {
+    background-color: #f0f9ff;
+    color: #09375B;
+}
+
+/* Radio button styling */
+.leaflet-control-layers-selector {
+    margin-left: 8px;
+    margin-right: 0;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: #09375B;
+}
+
+/* Selected layer highlight */
+.leaflet-control-layers label:has(input:checked) {
+    background-color: #d1fae5;
+    color: #065f46;
+    font-weight: 600;
+}
+
+/* Separator line */
+.leaflet-control-layers-separator {
+    height: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 8px 0;
+}
+
+/* RTL adjustments */
+[dir="rtl"] .leaflet-control-layers-selector {
+    margin-right: 8px;
+    margin-left: 0;
+}
+
+/* Mobile responsiveness for layer control */
+@media (max-width: 768px) {
+    .leaflet-control-layers-expanded {
+        min-width: 180px;
+        font-size: 13px;
+    }
+    
+    .leaflet-control-layers label {
+        padding: 8px 6px;
+        font-size: 13px;
+    }
+}
+
+/* Animation when opening/closing */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -475,6 +475,8 @@ function toggleInfoPanel() {
     const panel = document.getElementById('infoPanel');
     const icon = document.getElementById('toggleIcon');
     
+    if (!panel || !icon) return;
+    
     panel.classList.toggle('minimized');
     
     if (panel.classList.contains('minimized')) {
@@ -487,22 +489,49 @@ function toggleInfoPanel() {
 }
 
 /**
- * Auto-minimize info panel on mobile
+ * Auto-minimize info panel on mobile devices
  */
 function checkMobileView() {
     if (window.innerWidth <= 768) {
         const panel = document.getElementById('infoPanel');
         const icon = document.getElementById('toggleIcon');
         
-        if (!panel.classList.contains('minimized')) {
+        if (panel && !panel.classList.contains('minimized')) {
             panel.classList.add('minimized');
-            icon.textContent = '+';
+            if (icon) icon.textContent = '+';
             console.log('📱 Auto-minimized for mobile view');
         }
     }
 }
 
-// Call on load and resize
-window.addEventListener('DOMContentLoaded', checkMobileView);
-window.addEventListener('resize', checkMobileView);
+/**
+ * Initialize all event listeners
+ */
+function initEventListeners() {
+    // Minimize toggle button
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', toggleInfoPanel);
+        console.log('✅ Minimize button event listener attached');
+    }
+    
+    // Reset view button
+    const resetBtn = document.querySelector('.reset-view-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetView);
+        console.log('✅ Reset view button event listener attached');
+    }
+    
+    // Mobile view check
+    checkMobileView();
+    window.addEventListener('resize', checkMobileView);
+}
+
+// Initialize event listeners when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEventListeners);
+} else {
+    // DOM already loaded
+    initEventListeners();
+}
 

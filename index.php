@@ -45,7 +45,7 @@ if (!in_array($file_type, $supported_formats)) {
     <button class="close-btn" onclick="window.close()">✕ بستن</button>
 
     <!-- Reset View Button - RIGHT SIDE -->
-    <button class="reset-view-btn" onclick="resetView()" title="بازگشت به نمای کامل">
+    <button class="reset-view-btn" title="بازگشت به نمای کامل" aria-label="Reset view to show all data">
         🔍 نمای کامل
     </button>
     
@@ -53,7 +53,7 @@ if (!in_array($file_type, $supported_formats)) {
     <div class="info-panel" id="infoPanel">
         <h3>
             <span>📍 اطلاعات نقشه</span>
-            <button class="minimize-toggle" onclick="toggleInfoPanel()" title="کوچک کردن / بزرگ کردن" aria-label="Toggle info panel">
+            <button class="minimize-toggle" id="minimizeBtn" title="کوچک کردن / بزرگ کردن" aria-label="Toggle info panel">
                 <span id="toggleIcon">−</span>
             </button>
         </h3>
